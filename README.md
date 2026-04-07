@@ -131,5 +131,7 @@ SMOTE's n_jobs parameter was removed in newer versions of imbalanced-learn. Remo
 Kartavya Raikwar
 
 kartvayaraikwar@gmail.com
-https://kartvaya2008.github.io/portfolio_website-/
-https://www.linkedin.com/in/kartavya-raikwar-4940013a3
+
+portfolio_website - https://kartvaya2008.github.io/portfolio_website-/
+
+linkedin - https://www.linkedin.com/in/kartavya-raikwar-4940013a3
