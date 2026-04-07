@@ -75,6 +75,10 @@ The notebook is designed to be self-explanatory. Every non-obvious decision has 
 
 ---
 
+Dataset Note:
+The original dataset link was not accessible, so a similar large-scale fraud detection dataset (PaySim) was used to simulate real-world conditions.
+---
+
 ## Known Issues and Fixes Applied
 
 A few issues came up during development that are worth documenting:
