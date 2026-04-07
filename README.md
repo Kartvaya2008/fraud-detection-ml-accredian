@@ -1,228 +1,96 @@
-<div align="center">
+# Financial Fraud Detection
 
-# 🚀 SEO AI Generator
-
-### *Turn any topic into a fully optimized, AI-crafted article — in seconds.*
-
-> Powered by Groq AI · Fueled by SerpAPI · Built for scale
-
-[![Python](https://img.shields.io/badge/Python-3.10+-blue?style=flat-square&logo=python)](https://python.org)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=flat-square)]()
-
-</div>
+**Accredian Data Science & Machine Learning Internship**
 
 ---
 
-## ✨ What is SEO AI Generator?
+## About the Project
 
-**SEO AI Generator** is a full-stack AI-powered SEO automation tool that researches, writes, and scores SEO-optimized content for any topic — all from a clean, intuitive web UI. Just enter a keyword, hit generate, and get a publication-ready article backed by real search data and competitor insights.
+This project builds a machine learning pipeline to detect fraudulent mobile money transactions on a dataset of roughly 6.3 million records. The goal is not to maximize accuracy — a model that calls everything legitimate would already be 99.87% accurate and completely useless. The real objective is to catch fraud before money leaves the system, which means optimizing for recall while keeping false positives manageable.
 
-No manual keyword research. No guessing. Just results.
-
----
-
-## 🚀 Features
-
-- 🔍 **Smart Keyword Research** — Uses SerpAPI to fetch real-time keyword data, search volume trends, and top-ranking queries for your topic
-- 🕵️ **Competitor Insights** *(optional)* — Scrapes top-ranking competitor pages using BeautifulSoup to extract key themes, headings, and content patterns
-- 🧠 **AI Content Generation** — Generates high-quality, SEO-optimized articles using the blazing-fast **Groq API** (LLaMA 3 / Mixtral)
-- 📊 **SEO Scoring Engine** — Rates generated content on keyword density, readability, meta structure, heading hierarchy, and more via custom scoring logic
-- 🖥️ **Clean Web UI** — A responsive HTML/CSS/JS frontend served via FastAPI — no React, no bloat, just fast and clean
-- ⚡ **FastAPI Backend** — Asynchronous, production-ready REST API that handles all processing in the background
-- 🔐 **Secure API Key Management** — All secrets managed via `.env` file, never exposed to the frontend
+The dataset is based on PaySim, a financial transaction simulator modeled after real mobile money behavior (think M-Pesa or PayTM). Fraud in this dataset only appears in two transaction types: TRANSFER and CASH_OUT. That single observation shapes almost every decision made in this notebook.
 
 ---
 
-## 🧠 Tech Stack
+## What the Notebook Covers
 
-| Layer | Technology |
-|-------|-----------|
-| 🐍 Backend | **FastAPI** (Python) |
-| 🎨 Frontend | **HTML5, CSS3, Vanilla JavaScript** |
-| 🤖 AI Engine | **Groq API** (LLaMA 3 / Mixtral) |
-| 🔎 Keyword Research | **SerpAPI** |
-| 🕸️ Web Scraping | **BeautifulSoup4 + Requests** |
-| 🔧 Environment | **python-dotenv** |
-| 📦 Package Manager | **pip** |
+The notebook walks through the full pipeline from raw data to a production-ready model, with reasoning attached to every decision:
 
----
+**Problem framing** — Understanding what fraud costs the business, why accuracy is the wrong metric, and what the real trade-off between false positives and false negatives looks like in practice.
 
-## 📂 Project Structure
+**Exploratory analysis** — Fraud rate by transaction type, amount distributions, and the account-draining behavior that turns out to be one of the strongest signals in the data.
 
-```
-seo-ai-generator/
-│
-├── backend/
-│   ├── main.py                  # FastAPI app entry point
-│   ├── routes/
-│   │   ├── generate.py          # /generate endpoint
-│   │   └── keywords.py          # /keywords endpoint
-│   ├── services/
-│   │   ├── groq_service.py      # Groq API integration
-│   │   ├── serp_service.py      # SerpAPI integration
-│   │   ├── scraper.py           # Competitor scraping logic
-│   │   └── seo_scorer.py        # Custom SEO scoring engine
-│   └── utils/
-│       └── helpers.py           # Utility functions
-│
-├── frontend/
-│   ├── index.html               # Main UI page
-│   ├── style.css                # Styling
-│   └── script.js                # Frontend logic & API calls
-│
-├── .env.example                 # Environment variable template
-├── requirements.txt             # Python dependencies
-├── .gitignore
-└── README.md
-```
+**Data cleaning** — Handling missing values, dropping low-signal columns, and capping extreme outliers for logistic regression stability without removing them entirely (outliers are the signal in fraud detection).
+
+**Feature engineering** — Building balance error features that catch inconsistencies in transaction accounting, account-draining flags, destination balance change flags, and log-transformed amounts.
+
+**Multicollinearity check** — VIF analysis showing that raw balance columns are heavily correlated. The engineered difference features replace them.
+
+**Modeling** — Three models compared: Logistic Regression as a baseline, Random Forest, and XGBoost. Class imbalance is handled with SMOTE applied only to training data.
+
+**Evaluation** — ROC-AUC and PR-AUC as the primary metrics, with threshold tuning to find the operating point that maximizes F1 on the fraud class.
+
+**Business impact estimate** — Translating model performance into dollars saved and dollars missed, plus the cost of false alarms.
+
+**Recommendations** — Concrete steps for deploying the model, layering rule-based blocks on top of it, and measuring its effectiveness post-deployment.
 
 ---
 
-## ⚙️ Installation & Setup
+## Results
 
-Follow these steps to get the project running locally:
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/your-username/seo-ai-generator.git
-cd seo-ai-generator
-```
-
-### 2. Create a Virtual Environment
-
-```bash
-python -m venv venv
-
-# Activate it:
-# On Windows:
-venv\Scripts\activate
-
-# On macOS/Linux:
-source venv/bin/activate
-```
-
-### 3. Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 4. Set Up Environment Variables
-
-```bash
-cp .env.example .env
-```
-
-Then open `.env` and fill in your API keys (see [Environment Variables](#-environment-variables) below).
-
-### 5. Run the Backend
-
-```bash
-cd backend
-uvicorn main:app --reload
-```
-
-The API will be live at: `http://127.0.0.1:8000`
-
-### 6. Open the Frontend
-
-Open `frontend/index.html` directly in your browser, **or** serve it via FastAPI's static files (configured by default).
-
-```
-http://127.0.0.1:8000
-```
+The XGBoost model significantly outperforms the baseline and handles the class imbalance well. The top predictive features are the balance error terms and the account-draining flag, which makes intuitive sense: someone hacking an account will try to drain it fast and move the money before anyone notices. The model captures exactly that behavior.
 
 ---
 
-## 🔑 Environment Variables
+## Tech Stack
 
-Create a `.env` file in the root directory with the following keys:
-
-```env
-# .env
-
-# Groq API Key — https://console.groq.com
-GROQ_API_KEY=your_groq_api_key_here
-
-# SerpAPI Key — https://serpapi.com/manage-api-key
-SERP_API_KEY=your_serpapi_key_here
-```
-
-> ⚠️ **Never commit your `.env` file to GitHub.** It's already listed in `.gitignore`.
+- Python 3.12
+- pandas, numpy
+- scikit-learn
+- XGBoost
+- imbalanced-learn (SMOTE)
+- statsmodels (VIF)
+- matplotlib, seaborn
 
 ---
 
-## ▶️ Usage
+## Dataset
 
-Using SEO AI Generator is as simple as 1-2-3:
+PaySim — available on Kaggle:
+https://www.kaggle.com/datasets/ealaxi/paysim1
 
-1. **Enter a Topic** — Type your target keyword or article topic in the search bar (e.g., *"best Python frameworks 2025"*)
-2. **Click Generate** — Hit the **Generate** button and let the AI do its magic
-3. **Review Your Results** — The tool will display:
-   - 📝 Full AI-generated article
-   - 🔑 Researched keywords with relevance scores
-   - 📊 SEO score breakdown (readability, density, structure)
-   - 🕵️ Competitor insights *(if enabled)*
-
-That's it. Copy, edit, publish.
+The CSV file is not included in this repository due to its size (around 470 MB). Download it from Kaggle and place it in the project root before running the notebook.
 
 ---
 
-## 📸 Screenshots
+## How to Run
 
-> 🖼️ *Screenshots coming soon — the contributor will add UI previews here.*
+1. Clone the repository
+2. Install dependencies: `pip install -r requirements.txt`
+3. Download the PaySim dataset from Kaggle and place it in the project root
+4. Open `Fraud_Detection.ipynb` in Jupyter or Google Colab
+5. Run all cells in order
 
-| Home Screen | Results Page | SEO Score Panel |
-|:-----------:|:------------:|:---------------:|
-| *(coming soon)* | *(coming soon)* | *(coming soon)* |
-
----
-
-## 💡 Future Improvements
-
-Here's what's on the roadmap:
-
-- [ ] 🎨 **Enhanced UI/UX** — Dark mode, animations, and a more polished design system
-- [ ] 📈 **Advanced SEO Metrics** — Backlink analysis, Core Web Vitals hints, schema suggestions
-- [ ] 🌐 **Auto Blog Publishing** — Direct integration with WordPress, Ghost, or Hashnode APIs
-- [ ] 📊 **Analytics Dashboard** — Track content history, score trends, and keyword performance
-- [ ] 🌍 **Multi-language Support** — Generate content in multiple languages
-- [ ] 🔁 **Batch Generation** — Generate multiple articles from a keyword list at once
-- [ ] 🔌 **Plugin System** — Allow custom SEO scoring rules and AI prompt templates
+The notebook is designed to be self-explanatory. Every non-obvious decision has a comment explaining the reasoning behind it.
 
 ---
 
-## 🤝 Contributing
+## Known Issues and Fixes Applied
 
-Contributions are welcome and appreciated! 🙌
+A few issues came up during development that are worth documenting:
 
-If you'd like to improve this project — whether it's fixing a bug, adding a feature, or improving documentation — feel free to:
+The VIF computation requires a clean numeric matrix. Balance columns can produce inf values during feature engineering, which statsmodels cannot handle. The fix is to replace inf with NaN and drop those rows before computing VIF — applied directly to the temporary VIF dataframe, not to the main dataset.
 
-1. Fork the repo
-2. Create a new branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -m 'Add: your feature description'`)
-4. Push to the branch (`git push origin feature/your-feature`)
-5. Open a Pull Request
+The train-test split will fail with a ValueError if the target column contains NaN. This can happen if inf values were introduced during feature engineering and not caught early. The fix is to sanitize df_clean before defining X and y — replace inf, drop rows with NaN in the target, and fill remaining NaN in feature columns with zero.
 
-Please make sure your code is clean and well-commented.
+SMOTE's n_jobs parameter was removed in newer versions of imbalanced-learn. Remove it from the SMOTE constructor if you encounter a TypeError.
 
 ---
 
-## 📜 License
+## Author
 
-This project is licensed under the **MIT License** — you're free to use, modify, and distribute it.
+Kartavya Raikwar
 
-See the [LICENSE](LICENSE) file for full details.
-
----
-
-<div align="center">
-
-**Built with 🧠 AI + ❤️ passion by [Kartvaya](https://github.com/Kartvaya2008)**
-
-*If this project helped you, drop a ⭐ on GitHub — it means a lot!*
-
-</div>
+kartvayaraikwar@gmail.com
+https://kartvaya2008.github.io/portfolio_website-/
+https://www.linkedin.com/in/kartavya-raikwar-4940013a3
