@@ -12,6 +12,37 @@ The dataset is based on PaySim, a financial transaction simulator modeled after 
 
 ---
 
+## Screenshots
+
+### Data Load and First Look
+![Data Load](screenshot_1_data_load.png)
+
+### Class Distribution
+![Class Distribution](screenshot_2_class_distribution.png)
+
+### Fraud Patterns (EDA)
+![Fraud Patterns](screenshot_3_fraud_patterns.png)
+
+### Precision-Recall Curve — All Models
+![Precision-Recall Curve](screenshot_4_precision_recall.png)
+
+### XGBoost Results
+![XGBoost Results](screenshot_5_xgboost_results.png)
+
+### Random Forest Results
+![Random Forest Results](screenshot_6_random_forest.png)
+
+### Threshold Tuning
+![Threshold Tuning](screenshot_7_threshold_tuning.png)
+
+### Feature Importance
+![Feature Importance](screenshot_8_feature_importance.png)
+
+### Final Summary Dashboard
+![Final Summary](screenshot_9_final_summary.png)
+
+---
+
 ## What the Notebook Covers
 
 The notebook walks through the full pipeline from raw data to a production-ready model, with reasoning attached to every decision:
@@ -38,7 +69,15 @@ The notebook walks through the full pipeline from raw data to a production-ready
 
 ## Results
 
-The XGBoost model significantly outperforms the baseline and handles the class imbalance well. The top predictive features are the balance error terms and the account-draining flag, which makes intuitive sense: someone hacking an account will try to drain it fast and move the money before anyone notices. The model captures exactly that behavior.
+| Model | ROC-AUC | PR-AUC |
+|---|---|---|
+| Logistic Regression | 0.9977 | 0.770 |
+| Random Forest | 0.9999 | 0.9987 |
+| XGBoost | 0.9999 | 0.9986 |
+
+XGBoost was selected as the final model. At an optimal threshold of 0.85, it caught the vast majority of fraud with minimal false alarms. The top predictive features were newbalanceOrig, errorBalanceOrig, and orig_drained — all of which map directly to real criminal behavior: drain the account fast, move the money, and cash out before anyone notices.
+
+Estimated business impact on the test set: $2,405,998,403 saved, $5,871,869 missed.
 
 ---
 
@@ -73,10 +112,6 @@ The CSV file is not included in this repository due to its size (around 470 MB).
 
 The notebook is designed to be self-explanatory. Every non-obvious decision has a comment explaining the reasoning behind it.
 
----
-
-Dataset Note:
-The original dataset link was not accessible, so a similar large-scale fraud detection dataset (PaySim) was used to simulate real-world conditions.
 ---
 
 ## Known Issues and Fixes Applied
